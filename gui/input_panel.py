@@ -40,11 +40,11 @@ SCENARIOS: dict[str, list[dict]] = {
         {"pid": "P5", "arrival_time": "3",  "burst_time": "6",  "priority": "2"},
     ],
     "Scenario C – Starvation Risk": [
-        {"pid": "P1", "arrival_time": "0",  "burst_time": "1",  "priority": "1"},
-        {"pid": "P2", "arrival_time": "0",  "burst_time": "1",  "priority": "1"},
-        {"pid": "P3", "arrival_time": "0",  "burst_time": "1",  "priority": "1"},
-        {"pid": "P4", "arrival_time": "0",  "burst_time": "15", "priority": "5"},
-        {"pid": "P5", "arrival_time": "0",  "burst_time": "12", "priority": "4"},
+        {"pid": "P1", "arrival_time": "0",  "burst_time": "2",  "priority": "1"},
+        {"pid": "P2", "arrival_time": "0",  "burst_time": "2",  "priority": "1"},
+        {"pid": "P3", "arrival_time": "0",  "burst_time": "2",  "priority": "1"},
+        {"pid": "P4", "arrival_time": "0",  "burst_time": "20", "priority": "5"},
+        {"pid": "P5", "arrival_time": "2",  "burst_time": "3",  "priority": "2"},
     ],
     "Scenario D – Validation (has error)": [
         {"pid": "P1", "arrival_time": "0",  "burst_time": "5",  "priority": "2"},
