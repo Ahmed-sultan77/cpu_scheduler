@@ -495,7 +495,7 @@ class MainWindow(tk.Tk):
         )
 
         self._populate_comparison_tab(report, sjf_result, pri_result)
-
+        self.update_idletasks()
         self._nb.select(self._tab_sjf)
         self._set_status(
             f"Simulation complete  ·  {len(clean_rows)} processes  ·  "
