@@ -4,12 +4,6 @@
 
 ### SJF vs Priority Scheduling — Interactive Comparison Desktop Application
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square&logo=python)](https://www.python.org/)
-[![Tkinter](https://img.shields.io/badge/GUI-Tkinter-informational?style=flat-square)](https://docs.python.org/3/library/tkinter.html)
-[![Matplotlib](https://img.shields.io/badge/Charts-Matplotlib-orange?style=flat-square&logo=plotly)](https://matplotlib.org/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-[![Course](https://img.shields.io/badge/Course-Operating%20Systems-purple?style=flat-square)]()
-
 > A professional desktop simulator that implements and compares **Shortest Job First (SJF)** and **Priority Scheduling** algorithms side-by-side — complete with real-time Gantt charts, per-process metrics, starvation analysis, and an intelligent comparison engine.
 
 </div>
@@ -25,17 +19,13 @@
 - [Architecture & Design Principles](#-architecture--design-principles)
 - [Scheduling Algorithms](#-scheduling-algorithms)
 - [Metrics Explained](#-metrics-explained)
-- [Gantt Chart Visualization](#-gantt-chart-visualization)
 - [Installation Guide](#-installation-guide)
 - [Requirements](#-requirements)
 - [Running Tests](#-running-tests)
 - [Example Scenarios](#-example-scenarios)
 - [Validation Rules](#-validation-rules)
 - [Comparison System](#-comparison-system)
-- [Challenges & Engineering Decisions](#-challenges--engineering-decisions)
-- [Future Improvements](#-future-improvements)
 - [Team Contributions](#-team-contributions)
-- [License](#-license)
 - [Conclusion](#-conclusion)
 
 ---
@@ -65,7 +55,7 @@ This project bridges the gap between theoretical OS concepts and hands-on engine
 
 ---
 
-## ✨ Features
+##     Features
 
 ### 🎛️ Interactive GUI
 - Dark-themed, modern desktop interface built with **Tkinter**
@@ -191,55 +181,17 @@ cpu_scheduler/
 
 ## 🏛️ Architecture & Design Principles
 
-### Single Responsibility Principle (SRP)
+### 🎯 Core Principles
+*   **Single Responsibility (SRP):** Each module has a specific role—Validation, Scheduling, and Rendering are strictly decoupled for better maintainability.
+*   **Separation of Concerns:** A clear boundary exists between the **GUI (Presentation Layer)** and the **Scheduling Logic (Business Layer)**.
+*   **State Isolation:** Algorithms operate on independent data copies to prevent cross-interference during simultaneous simulation.
 
-Every module in this project has **one job and one job only**. The validator does not schedule. The scheduler does not render. The renderer does not compute metrics. This makes each component independently testable and replaceable.
-
-### Separation of Concerns
-
-```
-┌─────────────────────────────────────────────────────┐
-│                   USER INTERFACE                     │
-│         gui/main_window.py · gantt_chart.py          │
-│              input_panel.py                          │
-└───────────────────────┬─────────────────────────────┘
-                        │  calls
-┌───────────────────────▼─────────────────────────────┐
-│                  ORCHESTRATION                       │
-│              main_window._on_run()                   │
-└──────┬────────────────┬────────────────┬────────────┘
-       │                │                │
-┌──────▼──────┐  ┌──────▼──────┐  ┌─────▼──────────┐
-│  VALIDATION │  │  ALGORITHMS │  │    METRICS     │
-│ validator.py│  │ sjf.py      │  │ calculator.py  │
-│             │  │ priority.py │  │ comparison.py  │
-└──────┬──────┘  └──────┬──────┘  └─────┬──────────┘
-       │                │                │
-┌──────▼────────────────▼────────────────▼───────────┐
-│                   DATA MODEL                         │
-│              models.py · Process                     │
-└─────────────────────────────────────────────────────┘
-```
-
-### Simulation Pipeline (per Run)
-
-```
-Raw String Input (GUI)
-        ↓
-   Validator.validate_all()
-        ↓
-   create_process_list()
-        ↓
-   deepcopy × 2  ←── Critical: isolates state per algorithm
-       ↙ ↘
- run_sjf()   run_priority()
-       ↘ ↙
-   calculate()  ×  2
-        ↓
-   compare(sjf_result, pri_result)
-        ↓
-   GUI Rendering (Gantt + Tables + Comparison)
-```
+### 🔄 Simulation Pipeline
+1.  **Validation:** `Validator` audits raw input for errors or logical inconsistencies.
+2.  **Cloning:** `deepcopy` creates independent process lists for each algorithm.
+3.  **Execution:** SJF and Priority algorithms process their respective lists concurrently.
+4.  **Metrics:** `Calculator` computes WT, TAT, and RT; `Comparison` engine evaluates the winner.
+5.  **Visualization:** Matplotlib renders dynamic Gantt charts for the final UI output.
 
 ### Why `deepcopy`?
 
@@ -343,46 +295,6 @@ Avg RT  = Σ RT(i)  / n
 ```
 
 Where `n` is the total number of processes in the simulation.
-
----
-
-## 📊 Gantt Chart Visualization
-
-### How the Charts Work
-
-Each algorithm produces a raw timeline — a sequence of `(pid, start, end)` entries called `GanttEntry` records. Consecutive entries with the same PID are **compressed** into a single block before rendering.
-
-The Gantt chart is rendered using **Matplotlib embedded in a Tkinter frame** via `FigureCanvasTkAgg`. Each bar is drawn as a `FancyBboxPatch` with rounded corners for a modern appearance.
-
-### Color Mapping
-
-Each unique PID is assigned a color from a fixed 10-color palette at render time. The color map is built fresh on every simulation run, so process colors are consistent across SJF and Priority charts for the same session.
-
-```python
-PROCESS_COLORS = [
-    "#4F8EF7",  # Blue
-    "#43D9AD",  # Teal
-    "#F7634F",  # Red
-    "#F7C948",  # Yellow
-    "#A78BFA",  # Purple
-    ...
-]
-```
-
-### Idle CPU Handling
-
-When no process is available (all have higher arrival times than the current tick), the simulator inserts an `"idle"` entry in the Gantt. Idle blocks are rendered in a distinct neutral gray (`#3A3F5C`) and labeled **"Idle"** in the chart.
-
-### Timeline Rendering
-
-Time markers are placed at every block boundary. Vertical dashed reference lines are drawn at each time marker for easy reading. The x-axis label reads "Time (units)".
-
-### Why Visualization Matters
-
-A table of numbers alone does not reveal execution order, preemption points, or idle gaps. The Gantt chart makes the algorithm's behavior immediately visible:
-- You can see exactly when a process was preempted
-- You can see how long the CPU sat idle
-- You can visually compare the two algorithms for the same workload in seconds
 
 ---
 
@@ -615,97 +527,23 @@ The system generates a plain-English recommendation based on:
 
 ---
 
-## 🧠 Challenges & Engineering Decisions
-
-### 1. Deep Copy for Algorithm Isolation
-
-**Problem:** Both algorithms mutate `Process` objects in-place. Running SJF first would exhaust all `remaining_time` values, leaving Priority with nothing to schedule.
-
-**Decision:** Use `copy.deepcopy()` to create two completely independent process lists before invoking each algorithm. This guarantees each algorithm always starts from the same clean initial state.
-
-```python
-sjf_processes      = copy.deepcopy(base_processes)
-priority_processes = copy.deepcopy(base_processes)
-```
-
-### 2. Why SRP Was Non-Negotiable
-
-A naive implementation might put validation, scheduling, metric calculation, and rendering all in one file. This creates a system that is impossible to test, difficult to debug, and painful to extend.
-
-By enforcing SRP, we achieved: isolated unit tests for each layer, the ability to swap the GUI without touching the algorithms, and clean code review during team collaboration.
-
-### 3. Why Tkinter + Matplotlib
-
-**Tkinter** ships with Python's standard library — no heavy GUI framework installation required. This keeps the project accessible on any machine with Python installed.
-
-**Matplotlib** provides publication-quality chart rendering with minimal code. Embedding it via `FigureCanvasTkAgg` gave us full Gantt chart control without writing a custom canvas renderer.
-
-### 4. Why Starvation Analysis Matters
-
-Scheduling textbooks often describe starvation theoretically. This simulator makes it concrete: when you load Scenario C and see P4 flagged with a red warning, the concept becomes real and memorable. This was a deliberate educational design choice.
-
-### 5. Tick-by-Tick Simulation
-
-Rather than computing completion times mathematically, the simulator advances one unit of time per iteration. This approach:
-- Makes preemption trivially correct (re-evaluate ready queue every tick)
-- Produces an exact, verifiable Gantt timeline
-- Is easy to reason about and debug
-
 ---
 
-## 🔮 Future Improvements
-
-| Improvement | Description |
-|---|---|
-| **FCFS Algorithm** | Add First Come First Served for a three-way comparison baseline |
-| **Round Robin** | Add configurable time quantum and RR scheduling |
-| **MLFQ** | Multi-Level Feedback Queue to approximate real OS behavior |
-| **Export Reports** | Save simulation results as PDF or CSV |
-| **Animated Gantt** | Step-through animation showing process execution tick by tick |
-| **Multi-Core Simulation** | Extend to n-CPU scheduling with core assignment visualization |
-| **Aging Mechanism** | Implement priority aging to prevent starvation in Priority Scheduling |
-| **Dark/Light Theme Toggle** | User-selectable color schemes |
-| **Persistent Scenarios** | Save and load custom scenarios from JSON files |
-| **Statistical Analysis** | Run multiple scenario batches and plot performance distributions |
-
----
 
 ## 👥 Team Contributions
 
 | Member | Role | Contributions |
 |--------|------|--------------|
-| **Member 1** | Algorithm Engineer | `algorithms/sjf.py` — Preemptive SJF implementation, Gantt compression |
-| **Member 2** | Algorithm Engineer | `algorithms/priority.py` — Preemptive Priority implementation, tie-breaking logic |
-| **Member 3** | Metrics Engineer | `metrics/calculator.py`, `metrics/comparison.py` — All metric computation and comparison engine |
-| **Member 4** | GUI Engineer | `gui/main_window.py`, `gui/gantt_chart.py`, `gui/input_panel.py` — Full UI implementation |
-| **Member 5** | QA Engineer | `validator.py`, `tests/` — Input validation and complete test suite |
-| **Member 6** | Project Lead | `main.py`, `models.py`, `README.md` — Architecture, data model, documentation, integration |
+| **Mustafa Muhammad** | Algorithm Engineer | `algorithms/sjf.py` — Preemptive SJF implementation, Gantt compression |
+| **Ali Hisham** | Algorithm Engineer | `algorithms/priority.py` — Preemptive Priority implementation, tie-breaking logic |
+| **Abdel-Aati Zayed** | Metrics Engineer | `metrics/calculator.py`, `metrics/comparison.py` — All metric computation and comparison engine |
+| **Amr Sayed** | GUI Engineer | `gui/main_window.py`, `gui/gantt_chart.py`, `gui/input_panel.py` — Full UI implementation |
+| **Rahaf Magdy** | QA Engineer | `validator.py`, `tests/` — Input validation and complete test suite |
+| **Ahmed Sultan** | Project Lead | `main.py`, `models.py`, `README.md` — Architecture, data model, documentation, integration |
 
 ---
 
-## 📄 License
 
-```
-MIT License
-
-Copyright (c) 2025 CPU Scheduling Simulator Team
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-```
-
----
 
 ## 🎓 Conclusion
 
