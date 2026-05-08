@@ -57,7 +57,7 @@ def run_sjf(processes: list[Process]) -> dict:
             "run_sjf() received an empty or invalid process list."
         )
 
-    simulation_start: int = min(p.arrival_time for p in processes)
+    simulation_start: int = 0
     simulation_end_bound: int = (
         max(p.arrival_time for p in processes)
         + sum(p.burst_time for p in processes)

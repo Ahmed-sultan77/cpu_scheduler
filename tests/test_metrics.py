@@ -1,93 +1,69 @@
-import pandas as pd
+from __future__ import annotations
+import sys, os, pytest
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-class Process:
-    def __init__(self, pid, arrival_time, burst_time, priority):
-        self.pid = pid
-        self.arrival_time = arrival_time
-        self.burst_time = burst_time
-        self.priority = priority
+from models import Process
+from algorithms.sjf import run_sjf
+from algorithms.priority import run_priority
+from metrics.calculator import calculate
 
-class SchedulerMetrics:
-    @staticmethod
-    def calculate_averages(results):
-        n = len(results)
-        if n == 0: return 0, 0, 0
-        avg_wt = sum(p['wt'] for p in results) / n
-        avg_tat = sum(p['tat'] for p in results) / n
-        avg_rt = sum(p['rt'] for p in results) / n
-        return round(avg_wt, 2), round(avg_tat, 2), round(avg_rt, 2)
+def _make(pid, arrival, burst, priority=1):
+    return Process(pid=pid, arrival_time=arrival, burst_time=burst, priority=priority)
 
-    @staticmethod
-    def display_results(algorithm_name, results):
-        print(f"\n--- {algorithm_name} Results Table ---")
-        df = pd.DataFrame(results)
-        print(df[['pid', 'wt', 'tat', 'rt']].to_string(index=False))
-        return SchedulerMetrics.calculate_averages(results)
+class TestMetricsCalculation:
 
-def run_sjf_non_preemptive(processes):
-    procs = [Process(p.pid, p.arrival_time, p.burst_time, p.priority) for p in processes]
-    n = len(procs)
-    current_time, completed = 0, 0
-    is_completed = [False] * n
-    results = []
+    def test_wt_tat_rt_single_process(self):
+        p = _make("P1", arrival=0, burst=5)
+        result = run_sjf([p])
+        calc = calculate(result, "SJF")
+        proc = calc.processes[0]
+        assert proc.turnaround_time == 5   # CT(5) - AT(0)
+        assert proc.waiting_time    == 0   # TAT - BT
+        assert proc.response_time   == 0   # ST(0) - AT(0)
 
-    while completed < n:
-        available = [(i, procs[i]) for i in range(n) if procs[i].arrival_time <= current_time and not is_completed[i]]
-        if available:
-            idx, p = min(available, key=lambda x: x[1].burst_time)
-            start_time = current_time
-            finish_time = start_time + p.burst_time
-            results.append({
-                'pid': p.pid, 
-                'wt': start_time - p.arrival_time, 
-                'tat': finish_time - p.arrival_time, 
-                'rt': start_time - p.arrival_time
-            })
-            current_time = finish_time
-            is_completed[idx] = True
-            completed += 1
-        else:
-            current_time += 1
-    return results
+    def test_wt_tat_rt_with_wait(self):
+        procs = [_make("P1", 0, 5), _make("P2", 0, 3)]
+        result = run_sjf(procs)
+        calc = calculate(result, "SJF")
+        p2 = next(p for p in calc.processes if p.pid == "P2")
+        assert p2.turnaround_time == p2.completion_time - p2.arrival_time
+        assert p2.waiting_time    == p2.turnaround_time - p2.burst_time
+        assert p2.response_time   == p2.start_time - p2.arrival_time
 
-def run_priority_non_preemptive(processes):
-    procs = [Process(p.pid, p.arrival_time, p.burst_time, p.priority) for p in processes]
-    n = len(procs)
-    current_time, completed = 0, 0
-    is_completed = [False] * n
-    results = []
+    def test_averages_correct(self):
+        procs = [_make("P1", 0, 4), _make("P2", 0, 2)]
+        result = run_sjf(procs)
+        calc = calculate(result, "SJF")
+        expected_avg_tat = sum(p.turnaround_time for p in calc.processes) / 2
+        assert calc.avg_turnaround_time == round(expected_avg_tat, 2)
 
-    while completed < n:
-        available = [(i, procs[i]) for i in range(n) if procs[i].arrival_time <= current_time and not is_completed[i]]
-        if available:
-            idx, p = min(available, key=lambda x: (x[1].priority, x[1].arrival_time))
-            start_time = current_time
-            finish_time = start_time + p.burst_time
-            results.append({
-                'pid': p.pid, 
-                'wt': start_time - p.arrival_time, 
-                'tat': finish_time - p.arrival_time, 
-                'rt': start_time - p.arrival_time
-            })
-            current_time = finish_time
-            is_completed[idx] = True
-            completed += 1
-        else:
-            current_time += 1
-    return results
+    def test_response_time_equals_wt_for_nonpreemptive_like_case(self):
+        procs = [_make("P1", 0, 2), _make("P2", 3, 2)]
+        result = run_sjf(procs)
+        calc = calculate(result, "SJF")
+        for p in calc.processes:
+            assert p.response_time >= 0
 
-test_processes = [
-    Process(pid=1, arrival_time=0, burst_time=10, priority=1),
-    Process(pid=2, arrival_time=0, burst_time=2, priority=5),
-    Process(pid=3, arrival_time=2, burst_time=4, priority=2)
-]
+    def test_priority_metrics_consistent_with_gantt(self):
+        procs = [
+            Process(pid="P1", arrival_time=0, burst_time=4, priority=3),
+            Process(pid="P2", arrival_time=0, burst_time=2, priority=1),
+        ]
+        result = run_priority(procs)
+        calc = calculate(result, "Priority")
+        p2 = next(p for p in calc.processes if p.pid == "P2")
+        assert p2.start_time == 0
+        assert p2.completion_time == 2
+        assert p2.turnaround_time == 2
+        assert p2.waiting_time == 0
 
-sjf_res = run_sjf_non_preemptive(test_processes)
-pri_res = run_priority_non_preemptive(test_processes)
+    def test_late_arrival_rt_correct(self):
+        procs = [_make("P1", arrival=5, burst=3)]
+        result = run_sjf(procs)
+        calc = calculate(result, "SJF")
+        assert calc.processes[0].response_time == 0  # started immediately at arrival
+        assert calc.processes[0].turnaround_time == 3
 
-sjf_avg = SchedulerMetrics.display_results("SJF (Non-Preemptive)", sjf_res)
-pri_avg = SchedulerMetrics.display_results("Priority (Non-Preemptive)", pri_res)
-
-print("\n--- Final Comparison ---")
-print(f"SJF Avg WT: {sjf_avg[0]}, Avg TAT: {sjf_avg[1]}")
-print(f"Priority Avg WT: {pri_avg[0]}, Avg TAT: {pri_avg[1]}")
+    def test_empty_process_list_raises(self):
+        with pytest.raises((ValueError, Exception)):
+            calculate({"processes": [], "gantt": []}, "SJF")

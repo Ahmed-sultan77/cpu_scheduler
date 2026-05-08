@@ -25,6 +25,7 @@
 - [Example Scenarios](#-example-scenarios)
 - [Validation Rules](#-validation-rules)
 - [Comparison System](#-comparison-system)
+- [Required Analysis Questions](#-Required-Analysis-Questions)
 - [Team Contributions](#-team-contributions)
 - [Conclusion](#-conclusion)
 
@@ -355,6 +356,7 @@ matplotlib>=3.7.0
 ```
 matplotlib>=3.7.0
 pytest>=7.4.0
+pandas
 ```
 
 | Dependency | Purpose | Built-in? |
@@ -363,8 +365,8 @@ pytest>=7.4.0
 | `matplotlib` | Gantt chart rendering | ❌ Must install |
 | `dataclasses` | Process model | ✅ Python standard library |
 | `copy` | Deep copying process lists | ✅ Python standard library |
-| `pytest` | Running the test suite | ❌ Must install |
-
+| `pytest` | Running the test suite | ✅ Must install |
+| `pandas` | Running the test suite | ✅ Must install |
 ---
 
 ## 🧪 Running Tests
@@ -526,7 +528,25 @@ The system generates a plain-English recommendation based on:
 - The nature of the workload (burst-driven vs urgency-driven)
 
 ---
+## 📊 Required Analysis Questions
 
+**Q1: Which algorithm gave lower average waiting time?**  
+On Scenario A: SJF = X.XX | Priority = X.XX → SJF wins.
+
+**Q2: Which algorithm gave lower average turnaround time?**  
+...
+
+**Q3: Did SJF favor short jobs more strongly?**  
+Yes — in Scenario B, P4 (burst=1) ran at t=X under SJF vs t=X under Priority.
+
+**Q4: Did Priority favor urgent processes more strongly?**  
+Yes — P2 (priority=1, burst=10) ran first under Priority...
+
+**Q5: Was starvation or unfair delay observed?**  
+Yes — in Scenario C, P4 (burst=20) had WT=X under SJF, flagged by the starvation detector.
+
+**Q6: Which algorithm would you recommend, and why?**  
+Depends on workload: SJF for throughput-optimized systems; Priority for real-time/critical systems.
 ---
 
 
@@ -543,8 +563,15 @@ The system generates a plain-English recommendation based on:
 
 ---
 
+## Assumptions
 
+The original project description mentioned non-preemptive SJF.
+However, the official cover sheet explicitly instructed students to assume preemptive SJF and Priority Scheduling.
+Therefore, the project was implemented using:
+Preemptive SJF (SRTF)
+Preemptive Priority Scheduling
 
+---
 ## 🎓 Conclusion
 
 This project demonstrates that understanding CPU scheduling is not just about memorizing formulas — it is about observing how algorithmic decisions propagate through a running system and affect every process differently.

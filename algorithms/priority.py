@@ -51,7 +51,7 @@ def run_priority(processes: list[Process]) -> dict:
     if not processes:
         raise ValueError("Empty process list")
 
-    current_time = min(p.arrival_time for p in processes)
+    current_time = 0
     end_bound = max(p.arrival_time for p in processes) + sum(p.burst_time for p in processes) + 1
 
     raw_gantt = []
@@ -85,7 +85,7 @@ def run_priority(processes: list[Process]) -> dict:
             chosen.completion_time = current_time
             finished += 1
 
-    gantt = _compress_gantt(raw_gantt, start_offset=min(p.arrival_time for p in processes))
+    gantt = _compress_gantt(raw_gantt, start_offset=0)
 
     return {
         "processes": processes,
