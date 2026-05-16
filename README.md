@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🖥️ CPU Scheduling Simulator
+#  CPU Scheduling Simulator
 
 ### SJF vs Priority Scheduling — Interactive Comparison Desktop Application
 
@@ -10,7 +10,7 @@
 
 ---
 
-## 📋 Table of Contents
+##  Table of Contents
 
 - [Project Overview](#-project-overview)
 - [Features](#-features)
@@ -31,7 +31,7 @@
 
 ---
 
-## 📖 Project Overview
+##  Project Overview
 
 **CPU Scheduling** is one of the fundamental responsibilities of any operating system. The scheduler decides which process gets CPU time, for how long, and in what order — decisions that directly affect system responsiveness, throughput, and fairness.
 
@@ -58,56 +58,56 @@ This project bridges the gap between theoretical OS concepts and hands-on engine
 
 ##     Features
 
-### 🎛️ Interactive GUI
+###  Interactive GUI
 - Dark-themed, modern desktop interface built with **Tkinter**
 - Tabbed layout separating Input, SJF Results, Priority Results, and Comparison
 - Fully responsive to window resizing
 
-### 📋 Dynamic Process Table
+###  Dynamic Process Table
 - Add or remove processes at runtime (2–10 processes supported)
 - Each process accepts: PID, Arrival Time, Burst Time, and Priority
 - Scrollable table with alternating row colors for readability
 
-### ✅ Robust Validation System
+###  Robust Validation System
 - Real-time rejection of all invalid inputs before simulation begins
 - Detailed, human-readable error messages pinpointing the exact problem
 - Covers: negative values, zero burst time, non-integer input, duplicate PIDs, out-of-range priority, and missing fields
 
-### 📂 Built-in Scenario Presets
+###  Built-in Scenario Presets
 - Four pre-designed test scenarios loadable from a dropdown menu
 - Covers: basic workload, burst-vs-priority conflict, starvation risk, and invalid input demonstration
 
-### 📊 Dual Gantt Chart Visualization
+###  Dual Gantt Chart Visualization
 - Separate, color-coded Gantt chart rendered for each algorithm using **Matplotlib**
 - Distinct colors per process, clear time markers, idle CPU indication
 - Charts update live after every simulation run
 
-### 📐 Complete Metrics Calculation
+###  Complete Metrics Calculation
 - Per-process: **Waiting Time (WT)**, **Turnaround Time (TAT)**, **Response Time (RT)**
 - System-wide averages for all three metrics
 
-### ⚖️ Intelligent Comparison Engine
+###  Intelligent Comparison Engine
 - Side-by-side metric comparison table with winner highlighted per metric
 - Overall winner determined by majority of metrics won
 - Auto-generated textual analysis and recommendation
 
-### ⚠️ Starvation Analysis
+###  Starvation Analysis
 - Detects processes that waited significantly longer than the group average
 - Reports starvation risk per algorithm, per process ID
 - Uses a configurable multiplier threshold (`STARVATION_MULTIPLIER = 2.5`)
 
-### 🌑 Dark Mode UI
+###  Dark Mode UI
 - Consistent dark color palette designed for long study sessions
 - Accent colors differentiate SJF (blue) from Priority (red/orange)
 
-### 🏗️ Modular Architecture
+###  Modular Architecture
 - Clean separation between data models, business logic, and presentation layer
 - Each module has a single, clearly defined responsibility
 - Backend is fully testable independently of the GUI
 
 ---
 
-## 🖼️ GUI Preview
+##  GUI Preview
 
 > **Note:** Replace the placeholder paths below with actual screenshots after running the application.
 
@@ -129,7 +129,7 @@ This project bridges the gap between theoretical OS concepts and hands-on engine
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 cpu_scheduler/
@@ -180,14 +180,14 @@ cpu_scheduler/
 
 ---
 
-## 🏛️ Architecture & Design Principles
+##  Architecture & Design Principles
 
-### 🎯 Core Principles
+###  Core Principles
 *   **Single Responsibility (SRP):** Each module has a specific role—Validation, Scheduling, and Rendering are strictly decoupled for better maintainability.
 *   **Separation of Concerns:** A clear boundary exists between the **GUI (Presentation Layer)** and the **Scheduling Logic (Business Layer)**.
 *   **State Isolation:** Algorithms operate on independent data copies to prevent cross-interference during simultaneous simulation.
 
-### 🔄 Simulation Pipeline
+###  Simulation Pipeline
 1.  **Validation:** `Validator` audits raw input for errors or logical inconsistencies.
 2.  **Cloning:** `deepcopy` creates independent process lists for each algorithm.
 3.  **Execution:** SJF and Priority algorithms process their respective lists concurrently.
@@ -200,7 +200,7 @@ Both algorithms mutate `Process` objects in-place (`remaining_time`, `start_time
 
 ---
 
-## ⚙️ Scheduling Algorithms
+##  Scheduling Algorithms
 
 ### Algorithm A — Shortest Job First (Preemptive / SRTF)
 
@@ -244,7 +244,7 @@ Both algorithms mutate `Process` objects in-place (`remaining_time`, `start_time
 - Average waiting time can be worse than SJF when a high-priority process has a very long burst
 - Priority assignment is a design decision — wrong priorities lead to poor performance
 
-**Time Complexity:** O(n) per tick — O(n·T) total.
+**Time Complexity:** O(n) per tick — O(n) total.
 
 **Starvation Risk:** High for low-priority processes. Mitigated in practice by **aging** (gradually increasing priority of waiting processes).
 
@@ -252,7 +252,7 @@ Both algorithms mutate `Process` objects in-place (`remaining_time`, `start_time
 
 ---
 
-## 📐 Metrics Explained
+##  Metrics Explained
 
 All metrics are computed after the simulation completes, using the recorded `start_time`, `completion_time`, and the known `arrival_time` and `burst_time`.
 
@@ -299,7 +299,7 @@ Where `n` is the total number of processes in the simulation.
 
 ---
 
-## 🚀 Installation Guide
+##  Installation Guide
 
 ### Prerequisites
 
@@ -346,7 +346,7 @@ python3 main.py
 
 ---
 
-## 📦 Requirements
+##  Requirements
 
 ```
 matplotlib>=3.7.0
@@ -369,7 +369,7 @@ pandas
 | `pandas` | Running the test suite | ✅ Must install |
 ---
 
-## 🧪 Running Tests
+##  Running Tests
 
 The test suite is located in the `tests/` directory and uses **pytest**.
 
@@ -408,7 +408,7 @@ pytest tests/ --tb=short -v
 
 ---
 
-## 🗂️ Example Scenarios
+##  Example Scenarios
 
 The application ships with four pre-designed scenarios accessible from the dropdown menu in the Input tab.
 
@@ -475,7 +475,7 @@ Contains intentionally invalid data to demonstrate the validation system.
 
 ---
 
-## 🔒 Validation Rules
+##  Validation Rules
 
 The `Validator` class enforces all rules before any algorithm is invoked.
 
@@ -492,7 +492,7 @@ The `Validator` class enforces all rules before any algorithm is invoked.
 
 ---
 
-## ⚖️ Comparison System
+##  Comparison System
 
 The `compare()` function in `metrics/comparison.py` receives two `AlgorithmResult` objects and produces a `ComparisonReport`.
 
@@ -528,7 +528,7 @@ The system generates a plain-English recommendation based on:
 - The nature of the workload (burst-driven vs urgency-driven)
 
 ---
-## 📊 Required Analysis Questions
+##  Required Analysis Questions
 
 **Q1: Which algorithm gave lower average waiting time?**  
 On Scenario A: SJF = X.XX | Priority = X.XX → SJF wins.
@@ -550,7 +550,7 @@ Depends on workload: SJF for throughput-optimized systems; Priority for real-tim
 ---
 
 
-## 👥 Team Contributions
+##  Team Contributions
 
 | Member | Role | Contributions |
 |--------|------|--------------|
@@ -572,7 +572,7 @@ Preemptive SJF (SRTF)
 Preemptive Priority Scheduling
 
 ---
-## 🎓 Conclusion
+##  Conclusion
 
 This project demonstrates that understanding CPU scheduling is not just about memorizing formulas — it is about observing how algorithmic decisions propagate through a running system and affect every process differently.
 
